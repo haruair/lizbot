@@ -20,6 +20,24 @@ const actions = {
   '끄': 'off'
 }
 
+function operate(res, key, action, callback) {
+  const location = alias[key] || key
+  const status = actions[action] || action
+
+  request.post({
+    url: `${URI}/op/${location}`,
+    form: { status }
+  }, (err, response, body) => {
+      if (!body || err) {
+        return res.send('동작에 문제가 있습니다.')
+      }
+      let result = JSON.parse(body)
+      if (callback) {
+        callback.apply(res, [result])
+      }
+  })
+}
+
 module.exports = function (robot) {
   robot.hear(/(.*) (조명|불|등)(.*)(켜|꺼|끄)/i, (res) => {
     const key = res.match[1]
